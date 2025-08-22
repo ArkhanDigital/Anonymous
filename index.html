@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnonMsg - Platform Pesan Anonim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .nav-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .auth-container, .main-container {
+            display: none;
+        }
+
+        .auth-container.active, .main-container.active {
+            display: block;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .tab-btn, .auth-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active, .auth-btn.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.input-field {
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .link-display {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .messages-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .message-content {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .profile-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-username {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .profile-link {
+            font-family: monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .share-copy {
+            background: #28a745;
+            color: white;
+        }
+
+        .share-copy:hover {
+            background: #218838;
+        }
+
+        .username-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .check-btn {
+            padding: 10px 20px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .check-btn:hover {
+            background: #138496;
+        }
+
+        .availability-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .taken {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .send-form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .recipient-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .nav-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">AnonMsg</div>
+            <div class="subtitle">Platform Pesan Anonim Terpercaya</div>
+            <div class="nav-info" id="nav-info" style="display: none;">
+                <div class="user-info">
+                    <span>👋 Halo, <strong id="current-user-nav"></strong></span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Keluar</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Authentication Container -->
+            <div id="auth-container" class="auth-container active">
+                <div class="tab-buttons">
+                    <button class="auth-btn active" onclick="switchAuth('login')">Masuk</button>
+                    <button class="auth-btn" onclick="switchAuth('register')">Daftar</button>
+                </div>
+
+                <!-- Login Tab -->
+                <div id="login-tab" class="tab-content active">
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <input type="text" id="login-username" class="input-field" placeholder="Masukkan username Anda">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" id="login-password" class="input-field" placeholder="Masukkan password Anda">
+                    </div>
+                    <button class="btn btn-primary" onclick="login()">Masuk</button>
+                    <div id="login-result"></div>
+                </div>
+
+                <!-- Register Tab -->
+                <div id="register-tab" class="tab-content">
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <input type="text" id="register-username" class="input-field" placeholder="Pilih username unik (min 3 karakter)">
+                        <div class="username-check">
+                            <button class="check-btn" onclick="checkUsername()">Cek Ketersediaan</button>
+                            <div id="username-status"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" id="register-password" class="input-field" placeholder="Buat password (min 6 karakter)">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Konfirmasi Password</label>
+                        <input type="password" id="register-confirm" class="input-field" placeholder="Ulangi password Anda">
+                    </div>
+                    <button class="btn btn-primary" onclick="register()">Daftar Akun</button>
+                    <div id="register-result"></div>
+                </div>
+            </div>
+
+            <!-- Main Application Container -->
+            <div id="main-container" class="main-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+                    <button class="tab-btn" onclick="switchTab('send')">Kirim Pesan</button>
+                    <button class="tab-btn" onclick="switchTab('inbox')">Kotak Masuk</button>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="profile-info">
+                        <div class="profile-username" id="profile-username"></div>
+                        <div>Link Anonim Anda:</div>
+                        <div class="profile-link" id="profile-link"></div>
+                        <div class="share-buttons">
+                            <button class="share-btn share-copy" onclick="copyProfileLink()">📋 Salin Link</button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats" id="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-messages">0</div>
+                            <div class="stat-label">Total Pesan</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="today-messages">0</div>
+                            <div class="stat-label">Hari Ini</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="unread-messages">0</div>
+                            <div class="stat-label">Belum Dibaca</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Send Message Tab -->
+                <div id="send-tab" class="tab-content">
+                    <div class="send-form-container">
+                        <div class="input-group">
+                            <label class="input-label">Username Penerima</label>
+                            <input type="text" id="recipient" class="input-field" placeholder="Masukkan username penerima">
+                        </div>
+                        <div id="recipient-info" style="display: none;">
+                            <div class="recipient-info">
+                                <strong>Mengirim ke: <span id="recipient-name"></span></strong>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Pesan Anonim</label>
+                            <textarea id="message" class="input-field" placeholder="Tulis pesan anonim Anda di sini..." maxlength="1000"></textarea>
+                            <small style="color: #666;">Maksimal 1000 karakter</small>
+                        </div>
+                        <button class="btn btn-primary" onclick="sendMessage()">Kirim Pesan Anonim</button>
+                        <div id="send-result"></div>
+                    </div>
+                </div>
+
+                <!-- Inbox Tab -->
+                <div id="inbox-tab" class="tab-content">
+                    <div class="messages-container" id="messages-list">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulasi
+        let users = {}; // {username: {password: 'hash', messages: [], joinDate: Date, lastSeen: Date}}
+        let currentUser = null;
+
+        // Initialize dengan beberapa akun demo
+        users['demo'] = {
+            password: 'demo123',
+            messages: [
+                {
+                    content: 'Selamat datang di AnonMsg! 🎉',
+                    timestamp: new Date(Date.now() - 86400000),
+                    id: Date.now() + 1,
+                    read: false
+                },
+                {
+                    content: 'Platform ini sangat keren untuk menerima pesan anonim!',
+                    timestamp: new Date(Date.now() - 3600000),
+                    id: Date.now() + 2,
+                    read: false
+                }
+            ],
+            joinDate: new Date(Date.now() - 7 * 86400000),
+            lastSeen: new Date()
+        };
+
+        users['admin'] = {
+            password: 'admin123',
+            messages: [],
+            joinDate: new Date(Date.now() - 30 * 86400000),
+            lastSeen: new Date()
+        };
+
+        // Auth Functions
+        function switchAuth(type) {
+            // Hide all auth tabs
+            document.querySelectorAll('#auth-container .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from auth buttons
+            document.querySelectorAll('.auth-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(type + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function checkUsername() {
+            const username = document.getElementById('register-username').value.trim().toLowerCase();
+            const statusDiv = document.getElementById('username-status');
+            
+            if (!username) {
+                statusDiv.innerHTML = '';
+                return;
+            }
+            
+            if (username.length < 3) {
+                statusDiv.innerHTML = '<div class="availability-status taken">Minimal 3 karakter</div>';
+                return;
+            }
+            
+            if (!/^[a-z0-9_]+$/.test(username)) {
+                statusDiv.innerHTML = '<div class="availability-status taken">Hanya huruf, angka, dan underscore</div>';
+                return;
+            }
+            
+            if (users[username]) {
+                statusDiv.innerHTML = '<div class="availability-status taken">❌ Username sudah digunakan</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="availability-status available">✅ Username tersedia</div>';
+            }
+        }
+
+        function register() {
+            const username = document.getElementById('register-username').value.trim().toLowerCase();
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            
+            if (!username || !password || !confirm) {
+                showResult('register-result', 'Harap isi semua field!', 'error');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showResult('register-result', 'Username minimal 3 karakter!', 'error');
+                return;
+            }
+            
+            if (!/^[a-z0-9_]+$/.test(username)) {
+                showResult('register-result', 'Username hanya boleh mengandung huruf, angka, dan underscore!', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showResult('register-result', 'Password minimal 6 karakter!', 'error');
+                return;
+            }
+            
+            if (password !== confirm) {
+                showResult('register-result', 'Konfirmasi password tidak cocok!', 'error');
+                return;
+            }
+            
+            if (users[username])
